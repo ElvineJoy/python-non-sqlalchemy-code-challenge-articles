@@ -18,7 +18,7 @@ class Article:
         return self._title
     
     @title.setter
-    def title(self, title):
+    def title(self, value):
         print("Title is immutable")
         
 class Author:
@@ -41,38 +41,69 @@ class Author:
         return [article for article in Article.all if article.author == self]
 
     def magazines(self):
-        pass
+        return list({article.magazine for article in self.articles()})
 
     def add_article(self, magazine, title):
-        return Article(magazine, title)
+        return Article(self, magazine, title)
 
     def topic_areas(self):
-        pass
+        articles = self.articles()
+        if not articles:
+            return None
+        unique_topic_areas = {article.magazine.category for article in self.articles()}
+        return list(unique_topic_areas)
 
 class Magazine:
     all = []
 
     def __init__(self, name, category):
+        if not isinstance(name, str) or not (2 <= len(name) <=16):
+            raise ValueError("The name must be a string between 2 and 16 characters.")
+        if not isinstance(category, str) or not category:
+            raise ValueError("Category must be a non-empty string.")
+        self._name = name
+        self._category = category
+        Magazine.all.append(self)
+
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, name):
         if not isinstance(name, str):
             raise ValueError("The name must be a string.")
-        if not (2 <=len(name) <= 16):
+        if not (2 <= len(name) <= 16):
             raise ValueError("The name length must be between 2 and 16 characters.")
+        self._name = name
+        
+    @property
+    def category(self):
+        return self._category
+    
+    @category.setter
+    def category(self, category): 
         if not isinstance(category, str):
             raise ValueError("Category must be a string.")
         if not category:
             raise ValueError("The category cannot be empty.")
-        self.name = name
-        self.category = category
-        Magazine.all.append(self)
+        self._category = category
 
     def articles(self):
-        pass
+        return [article for article in Article.all if article.magazine == self]
 
     def contributors(self):
-        pass
+        return list({article.author for article in self.articles()})
 
     def article_titles(self):
-        pass
+        articles = self.articles()
+        if not articles:
+            return None
+        return [article.title for article in self.articles()]
 
     def contributing_authors(self):
-        pass
+        authors = [article.author for article in self.articles()]
+        contributing_authors = [author for author in set(authors) if authors.count(author) >2]
+        if not contributing_authors:
+            return None
+        return contributing_authors
